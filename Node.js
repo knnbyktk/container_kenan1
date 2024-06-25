@@ -1,34 +1,34 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-async function getPrayerTimes() {
+async function fetchNamazTimes(cityId) {
+    const url = `https://www.diyanet.gov.tr/tr-TR/${cityId}/namazvakitleri`;
     try {
-        const url = 'https://www.diyanet.gov.tr/tr/'; // Diyanet'in namaz vakitleri sayfasının URL'si
-
-        // Web sayfasını axios ile getir
         const response = await axios.get(url);
-        const html = response.data;
+        const $ = cheerio.load(response.data);
 
-        // Cheerio kullanarak HTML'i parse et
-        const $ = cheerio.load(html);
+        const namazTimes = {};
 
-        // Namaz vakitlerinin bulunduğu elementin seçici bilgisi
-        const vakitlerElement = $('.pt-0 .col-md-4:nth-child(2) .vakit-listesi');
+        $('table.diyanetDataTable tbody tr').each((index, element) => {
+            const time = $(element).find('td:nth-child(2)').text().trim();
+            const name = $(element).find('td:nth-child(1)').text().trim();
 
-        // Namaz vakitlerini içeren metinleri al
-        const namazVakitleri = [];
-        vakitlerElement.find('li').each((index, element) => {
-            const vakit = $(element).text().trim();
-            namazVakitleri.push(vakit);
+            namazTimes[name] = time;
         });
 
-        // Konsola namaz vakitlerini yazdır
-        console.log('Namaz Vakitleri:');
-        console.log(namazVakitleri);
+        return namazTimes;
     } catch (error) {
-        console.error('Hata:', error);
+        console.error('Error fetching namaz times:', error);
+        return null;
     }
 }
 
-// Fonksiyonu çağırarak namaz vakitlerini getir
-getPrayerTimes();
+// Örnek olarak İstanbul için namaz vakitlerini çekelim (cityId = 34)
+fetchNamazTimes(34)
+    .then(times => {
+        if (times) {
+            console.log('Namaz Times for Istanbul:');
+            console.log(times);
+        }
+    })
+    .catch(err => console.error('Error fetching namaz times:', err));
