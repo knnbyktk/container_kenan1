@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Namaz Vakitleri</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .vakit {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Namaz Vakitleri</h1>
+    <div id="namaz-vakitleri"></div>
+
+    <script>
+        async function fetchNamazVakitleri(ilceId) {
+            try {
+                const response = await fetch(`https://ezanvakti.herokuapp.com/vakitler?ilce=${ilceId}`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const vakitler = await response.json();
+                displayNamazVakitleri(vakitler);
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+
+        function displayNamazVakitleri(vakitler) {
+            const container = document.getElementById('namaz-vakitleri');
+            container.innerHTML = '';  // Clear previous contents
+
+            vakitler.forEach(vakit => {
+                const vakitDiv = document.createElement('div');
+                vakitDiv.className = 'vakit';
+                vakitDiv.innerHTML = `
+                    <strong>Tarih:</strong> ${vakit.MiladiTarihKisa} <br>
+                    <strong>İmsak:</strong> ${vakit.Imsak} <br>
+                    <strong>Güneş:</strong> ${vakit.Gunes} <br>
+                    <strong>Öğle:</strong> ${vakit.Ogle} <br>
+                    <strong>İkindi:</strong> ${vakit.Ikindi} <br>
+                    <strong>Akşam:</strong> ${vakit.Aksam} <br>
+                    <strong>Yatsı:</strong> ${vakit.Yatsi} <br>
+                `;
+                container.appendChild(vakitDiv);
+            });
+        }
+
+        // Örneğin, İstanbul'un ilçesi Fatih için ilceId 9546
+        fetchNamazVakitleri(9546);
+    </script>
+</body>
+</html>
